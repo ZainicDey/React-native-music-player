@@ -345,29 +345,7 @@ export default function MusicHomeScreen() {
 						</View>
 
 						{/* Controls */}
-						<View style={styles.functionsView}>
-							<TouchableOpacity onPress={shufflePlaylist}>
-								<Entypo name="shuffle" size={24} color="#e75480" style={{ marginHorizontal: 10 }} />
-							</TouchableOpacity>
-							<TouchableOpacity onPress={playPreviousSong}>
-								<Entypo name="controller-fast-backward" size={24} color="#e75480" style={{ marginHorizontal: 10 }} />
-							</TouchableOpacity>
-							{isPlaying ? (
-								<TouchableOpacity onPress={pausePreview}>
-									<AntDesign name="pausecircle" size={50} color="#e75480" style={{ marginHorizontal: 10 }} />
-								</TouchableOpacity>
-							) : (
-								<TouchableOpacity onPress={resumePreview}>
-									<AntDesign name="play" size={50} color="#e75480" style={{ marginHorizontal: 10 }} />
-								</TouchableOpacity>
-							)}
-							<TouchableOpacity onPress={playNextSong}>
-								<Entypo name="controller-fast-forward" size={24} color="#e75480" style={{ marginHorizontal: 10 }} />
-							</TouchableOpacity>
-							<TouchableOpacity onPress={() => setIsPlaylistOpen(true)}>
-								<AntDesign name="bars" size={20} color="#e75480" style={{ marginHorizontal: 10 }} />
-							</TouchableOpacity>
-						</View>
+						
 					</View>
 				</SafeAreaView>
 			</Modal>
