@@ -25,10 +25,6 @@ export default function MusicHomeScreen() {
 	const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 	const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [position, setPosition] = useState(0);
-	const [duration, setDuration] = useState(30); // Default duration for previews is 30 seconds
-	const [slidingPosition, setSlidingPosition] = useState<number | null>(null);
-	const [isSeeking, setIsSeeking] = useState(false);
 
 	const playLockRef = useRef(false);
 
@@ -92,21 +88,9 @@ export default function MusicHomeScreen() {
 			newSound.setOnPlaybackStatusUpdate(status => {
 				if (!status.isLoaded) return;
 				setIsPlaying(status.isPlaying);
-				
-				// Update position if not currently seeking
-				if (!isSeeking && status.positionMillis !== undefined) {
-					setPosition(status.positionMillis / 1000);
-				}
-				
-				// Update duration once if available
-				if (status.durationMillis && status.durationMillis > 0) {
-					setDuration(status.durationMillis / 1000);
-				}
-				
 				if (!status.isPlaying && status.didJustFinish) {
 					setPlayingId(null);
 					setIsPlaying(false);
-					setPosition(0);
 					// Auto-play next song from playlist if available
 					playNextFromPlaylist();
 				}
@@ -227,39 +211,6 @@ export default function MusicHomeScreen() {
 		playPreview(nextSong);
 	};
 
-	// Helper function to format time
-	const formatTime = (seconds: number) => {
-		const mins = Math.floor(seconds / 60);
-		const secs = Math.floor(seconds % 60);
-		return `${mins}:${secs < 10 ? '0' + secs : secs}`;
-	};
-
-	// Handle slider change
-	const onSlidingStart = () => {
-		setIsSeeking(true);
-	};
-
-	const onSlidingComplete = async (value: number) => {
-		if (!sound) return;
-		
-		setIsSeeking(false);
-		setPosition(value);
-		
-		try {
-			await sound.setPositionAsync(Math.floor(value * 1000));
-			// If it was playing before seeking, resume playback
-			if (isPlaying) {
-				await sound.playAsync();
-			}
-		} catch (error) {
-			console.error("Failed to seek:", error);
-		}
-	};
-
-	const onSliderValueChange = (value: number) => {
-		setSlidingPosition(value);
-	};
-
 	return (
 		<View style={{ flex: 1, padding: 16, paddingTop: 40, paddingBottom: currentSong ? 80 : 16, backgroundColor: '#f5f5f5' }}>
 			<TextInput
@@ -333,8 +284,6 @@ export default function MusicHomeScreen() {
 								setCurrentSong(null);
 								setPlayingId(null);
 								setIsPlaying(false);
-								setPosition(0);
-								setSlidingPosition(null);
 								if (sound) {
 									sound.stopAsync();
 									sound.unloadAsync();
@@ -375,30 +324,24 @@ export default function MusicHomeScreen() {
 
 						{/* Slider */}
 						<View style={styles.sliderView}>
-							<Text style={styles.sliderTime}>{formatTime(isSeeking && slidingPosition !== null ? slidingPosition : position)}</Text>
+							<Text style={styles.sliderTime}>0:00</Text>
 							{Platform.OS === 'web' ? (
 								<View style={[styles.sliderStyle, { backgroundColor: '#d3d3d3', borderRadius: 5, overflow: 'hidden', height: 8 }]}>
-									<View style={{ 
-										width: `${((isSeeking && slidingPosition !== null ? slidingPosition : position) / duration) * 100}%`, 
-										height: '100%', 
-										backgroundColor: '#e75480' 
-									}} />
+									<View style={{ width: '0%', height: '100%', backgroundColor: '#e75480' }} />
 								</View>
 							) : (
 								<Slider
 									style={styles.sliderStyle}
 									minimumValue={0}
-									maximumValue={duration}
+									maximumValue={30}
 									minimumTrackTintColor="#e75480"
 									maximumTrackTintColor="#d3d3d3"
 									thumbTintColor="#e75480"
-									value={isSeeking && slidingPosition !== null ? slidingPosition : position}
-									onSlidingStart={onSlidingStart}
-									onSlidingComplete={onSlidingComplete}
-									onValueChange={onSliderValueChange}
+									value={0}
+									disabled
 								/>
 							)}
-							<Text style={styles.sliderTime}>{formatTime(duration)}</Text>
+							<Text style={styles.sliderTime}>0:30</Text>
 						</View>
 
 						{/* Controls */}
